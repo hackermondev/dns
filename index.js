@@ -1,7 +1,7 @@
-var named = require('node-named');
+var named = require('node-named-fixed');
 var server = named.createServer();
 
-server.listen(6969, '127.0.0.1', function() {
+server.listen(53, '127.0.0.1', function() {
   console.log('DNS server started on port 9999');
 });
 
