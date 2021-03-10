@@ -1,15 +1,23 @@
-var named = require('node-named-fixed');
-var server = named.createServer();
+const dns = require('node-dns');
 
-server.listen(53, '127.0.0.1', function() {
-  console.log('DNS server started on port 9999');
+const { Packet } = dns;
+
+const server = dns.createUDPServer((request, send, rinfo) => {
+  const response = Packet.createResponseFromRequest(request);
+  const [ question ] = request.questions;
+  const { name } = question;
+  response.answers.push({
+    name,
+    type: Packet.TYPE.A,
+    class: Packet.CLASS.IN,
+    ttl: 300,
+    address: '8.8.8.8'
+  });
+  send(response);
 });
 
-server.on('query', function(query) {
-  var domain = query.name();
-  console.log('DNS Query: %s', domain)
-
-  var target = new SoaRecord(domain, {serial: 12345})
-  query.addAnswer(domain, target, 'SOA');
-  server.send(query);
+server.on('request', (request, response, rinfo) => {
+  console.log(request.header.id, request.questions[0]);
 });
+
+server.listen(5333);
